@@ -9,7 +9,8 @@ let
 in
 deployAndroidPackage {
   inherit package os;
-  nativeBuildInputs = [ autoPatchelfHook makeWrapper ];
+  nativeBuildInputs = [ makeWrapper ]
+    ++ lib.optionals pkgs.stdenv.isLinux [ autoPatchelfHook ];
   autoPatchelfIgnoreMissingDeps = true;
   buildInputs = lib.optional (os == "linux") [ pkgs.glibc pkgs.stdenv.cc.cc pkgs.python2 pkgs.ncurses5 pkgs.zlib pkgs.libcxx.out pkgs.libxml2 ];
   patchInstructions = lib.optionalString (os == "linux") (''
