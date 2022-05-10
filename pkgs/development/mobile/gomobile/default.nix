@@ -9,15 +9,15 @@
 
 buildGoModule {
   pname = "gomobile";
-  version = "unstable-2021-06-14";
+  version = "unstable-2022-05-04";
 
-  vendorSha256 = "1irgkgv72rakg7snk1bnp10ibr64ykz9l40s59l4fnl63zsh12a0";
+  vendorSha256 = "sha256-AmOy3X+d2OD7ZLbFuy+SptdlgWbZJaXYEgO79M64ufE=";
 
   src = fetchgit {
-    rev = "7c8f154d100840bc5828285bb390bbae1cb5a98c";
+    rev = "50dca8fc073d03ff0058102c8e4672ac302cb764";
     name = "gomobile";
     url = "https://go.googlesource.com/mobile";
-    sha256 = "1w9mra1mqf60iafp0ywvja5196fjsjyfhvz4yizqq4qkyll5qmj1";
+    sha256 = "sha256-ODSMMZ/qZsrszTsFqsVtRbUho4YESJSxnxQiXVgp6u4=";
   };
 
   subPackages = [ "bind" "cmd/gobind" "cmd/gomobile" ];
@@ -56,6 +56,7 @@ buildGoModule {
     description = "A tool for building and running mobile apps written in Go";
     homepage = "https://pkg.go.dev/golang.org/x/mobile/cmd/gomobile";
     license = licenses.bsd3;
+    platforms = platforms.unix;
     maintainers = with maintainers; [ jakubgs ];
   };
 }
