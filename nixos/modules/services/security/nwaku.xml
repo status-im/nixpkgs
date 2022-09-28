@@ -1,0 +1,54 @@
+<chapter xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         version="5.0"
+         xml:id="module-services-nwaku">
+ <title>Nim Waku</title>
+ <para>
+  <emphasis>Source:</emphasis>
+  <filename>modules/services/security/nwaku.nix</filename>
+ </para>
+ <para>
+  <emphasis>Upstream documentation:</emphasis>
+  <link xlink:href="https://waku.org/"/>
+ </para>
+ <para>
+  To start a basic node with store, relay, filter, swap, and lightpush procotols enabled,
+  connected to the main <link xlink:href="https://status.im/">Status.im</link> fleet use:
+<programlisting>
+services.nwaku = {
+  <link linkend="opt-services.nwaku.enable">enable</link> = true;
+  <link linkend="opt-services.nwaku.tcpPort">tcpPort</link> = 8888;
+  <link linkend="opt-services.nwaku.protocols">protocols</link> = ["store" "relay" "filter" "swap" "lightpush"];
+  <link linkend="opt-services.nwaku.nodekey">nodekey</link> = "abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234";
+  <link linkend="opt-services.nwaku.nat">nat</link> = "extip:12.34.56.78";
+  rest = {
+    <link linkend="opt-services.nwaku.rest.enable">enable</link> = true;
+    <link linkend="opt-services.nwaku.rest.admin">admin</link> = true;
+    <link linkend="opt-services.nwaku.rest.port">port</link> = 5052;
+  };
+  dnsDiscovery = {
+    <link linkend="opt-services.nwaku.dnsDiscovery.enable">enable</link> = true;
+    <link linkend="opt-services.nwaku.dnsDiscovery.url">url</link> = "enrtree://AOGECG2SPND25EEFMAJ5WF3KSGJNSGV356DSTL2YVLLZWIV6SAYBM@prod.nodes.status.im";
+  };
+  sqliteStore = {
+    <link linkend="opt-services.nwaku.sqliteStore.enable">enable</link> = true;
+    <link linkend="opt-services.nwaku.sqliteStore.retentionTime">retentionTime</link> = 30*24*60*60;
+  };
+};
+</programlisting>
+  This node will store 30 days worth of messages it will receive under <literal>/var/run/nwaku</literal>.
+ </para>
+ <para>
+  You can check the node addresses using the REST API:
+<screen>
+ <prompt>$ </prompt>curl -sSf localhost:5052/debug/v1/info | jq
+{
+  "listenAddresses": [
+    "/ip4/12.34.56.78/tcp/8888/p2p/16Uiu2HAmDFsM5S7fTaaDpc2BYdE6nqSoR7mg5ou2R73fJRrELMiT"
+  ],
+  "enrUri": "enr:-Iu4QCKaz_TAPebEcvjx3VonobqeGXpnrI4HcYHwmncekzrIV6Y9QfCnnU4xC_5f5KprFak0VBgYteb1UjJJGaYxVJsBgmlkgnY0"
+}
+</screen>
+ </para>
+</chapter>
