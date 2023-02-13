@@ -9,11 +9,33 @@ let
 in
 deployAndroidPackage {
   inherit package os;
-  nativeBuildInputs = [ makeWrapper ]
-    ++ lib.optionals stdenv.isLinux [ autoPatchelfHook ];
+  nativeBuildInputs = [ makeWrapper autoPatchelfHook ];
   autoPatchelfIgnoreMissingDeps = true;
   buildInputs = lib.optionals (os == "linux") [ pkgs.zlib ];
-  patchInstructions = ''
+
+  patchElfBnaries = ''
+    # Patch the executables of the toolchains, but not the libraries -- they are needed for crosscompiling
+    if [ -d $out/libexec/android-sdk/ndk-bundle/toolchains/renderscript/prebuilt/linux-x86_64/lib64 ]; then
+        addAutoPatchelfSearchPath $out/libexec/android-sdk/ndk-bundle/toolchains/renderscript/prebuilt/linux-x86_64/lib64
+    fi
+
+    if [ -d $out/libexec/android-sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/lib64 ]; then
+        addAutoPatchelfSearchPath $out/libexec/android-sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/lib64
+    fi
+
+    find toolchains -type d -name bin -or -name lib64 | while read dir; do
+        autoPatchelf "$dir"
+    done
+
+    # Patch executables
+    if [ -d prebuilt/linux-x86_64 ]; then
+        autoPatchelf prebuilt/linux-x86_64
+    fi
+  '';
+
+  patchInstructions = lib.optionalString stdenv.isLinux patchElfBnaries + ''
+    runHook patchElfBnaries
+
     patchShebangs .
 
     # TODO: allow this stuff
@@ -28,28 +50,10 @@ deployAndroidPackage {
         exit 1
     fi
 
-    # Patch the executables of the toolchains, but not the libraries -- they are needed for crosscompiling
-    if [ -d $out/libexec/android-sdk/ndk-bundle/toolchains/renderscript/prebuilt/linux-x86_64/lib64 ]; then
-        addAutoPatchelfSearchPath $out/libexec/android-sdk/ndk-bundle/toolchains/renderscript/prebuilt/linux-x86_64/lib64
-    fi
-
-    if [ -d $out/libexec/android-sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/lib64 ]; then
-        addAutoPatchelfSearchPath $out/libexec/android-sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/lib64
-    fi
-
-    find toolchains -type d -name bin -or -name lib64 | while read dir; do
-        autoPatchelf "$dir"
-    done
-
     # fix ineffective PROGDIR / MYNDKDIR determination
     for progname in ndk-build; do
         sed -i -e 's|^PROGDIR=`dirname $0`|PROGDIR=`dirname $(readlink -f $(which $0))`|' $progname
     done
-
-    # Patch executables
-    if [ -d prebuilt/linux-x86_64 ]; then
-        autoPatchelf prebuilt/linux-x86_64
-    fi
 
     # wrap
     for progname in ndk-build; do
