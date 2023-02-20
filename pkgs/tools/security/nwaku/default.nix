@@ -1,5 +1,5 @@
 {
-  stdenv, fetchgit, lib, which, writeScriptBin,
+  stdenv, fetchgit, lib, nim, which, writeScriptBin,
   # Options: wakunode1, wakunode2, wakubridge
   makeTargets ? [ "wakunode2" ],
   # WARNING: CPU optmizations that make binary not portable.
@@ -23,7 +23,7 @@ stdenv.mkDerivation rec {
     # Fix for Nim compiler calling 'git rev-parse' and 'lsb_release'.
     fakeGit = writeScriptBin "git" "echo $commit";
     fakeLsbRelease = writeScriptBin "lsb_release" "echo nix";
-  in [ fakeGit fakeLsbRelease which ];
+  in [ fakeGit fakeLsbRelease which nim ];
 
   enableParallelBuilding = true;
 
@@ -32,17 +32,17 @@ stdenv.mkDerivation rec {
 
   NIMFLAGS = lib.optionalString (!nativeBuild) " -d:disableMarchNative";
 
-  makeFlags = makeTargets;
-
-  preBuildPhases = [ "buildCompiler" ];
+  # Use available Nim and avoid recompiling Nim for every build.
+  makeFlags = makeTargets ++ [ "USE_SYSTEM_NIM=1" ];
 
   # Generate vendor/.nimble contents with correct paths.
   configurePhase = ''
     runHook preConfigure
+    export HOME=$PWD
+    export PWD_CMD=$(which pwd)
     export EXCLUDED_NIM_PACKAGES=""
     export NIMBLE_LINK_SCRIPT=$PWD/vendor/nimbus-build-system/scripts/create_nimble_link.sh
     export NIMBLE_DIR=$PWD/vendor/.nimble
-    export PWD_CMD=$(which pwd)
     patchShebangs $PWD/vendor/nimbus-build-system/scripts > /dev/null
     for dep_dir in $(find vendor -type d -maxdepth 1); do
         pushd "$dep_dir" >/dev/null
@@ -50,14 +50,6 @@ stdenv.mkDerivation rec {
         popd >/dev/null
     done
     runHook postConfigure
-  '';
-
-  # Nimbus uses it's own specific Nim version bound as a Git submodule.
-  buildCompiler = ''
-    # Necessary for nim cache creation
-    export HOME=$PWD
-    make -j$NIX_BUILD_CORES build-nim
-    export PATH="$PWD/vendor/nimbus-build-system/vendor/Nim/bin:$PATH"
   '';
 
   installPhase = ''
