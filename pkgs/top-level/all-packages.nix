@@ -18510,6 +18510,7 @@ with pkgs;
   gradle_6 = callPackage gradle-packages.gradle_6 { };
   gradle_7 = callPackage gradle-packages.gradle_7 { };
   gradle_8 = callPackage gradle-packages.gradle_8 { };
+  gradle_8_3 = callPackage gradle-packages.gradle_8_3 { };
   gradle = gradle_8;
 
   grcov = callPackage ../development/tools/misc/grcov { };
