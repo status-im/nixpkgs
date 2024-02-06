@@ -127,9 +127,9 @@ rec {
   # https://docs.gradle.org/current/userguide/compatibility.html
 
   gradle_8 = gen {
-    version = "8.0.1";
+    version = "8.3";
     nativeVersion = "0.22-milestone-24";
-    sha256 = "02g9i1mrpdydj8d6395cv6a4ny9fw3z7sjzr7n6l6a9zx65masqv";
+    sha256 = "09cjyss4bcnig1wzhxpwyn4kznkawzaha7fy0jg5nqzw2ysma62r";
     defaultJava = jdk17;
   };
 
